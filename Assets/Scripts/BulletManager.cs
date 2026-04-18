@@ -19,6 +19,7 @@ public class BulletManager : MonoBehaviour
     private int bulletNum;
     private static Quaternion originalRot = Quaternion.Euler(0, 0, 0);
     private Vector3 originalPos;
+    
     //Unity Basics
     private void Start()
     {

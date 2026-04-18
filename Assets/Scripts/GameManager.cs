@@ -37,8 +37,7 @@ public class GameManager : MonoBehaviour
             Instance.player = Instantiate(Instance.player);
         Instance.player.transform.position = Vector3.up;
         Instance.player.name = "Player";
-        
+  
     }
     //Methods
-
 }

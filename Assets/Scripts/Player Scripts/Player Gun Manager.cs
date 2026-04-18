@@ -68,27 +68,17 @@ public class PlayerGunManager : MonoBehaviour
         }
         playerUI.UpdateGunAmmo(currentGun.GetMaxMagAmmo(), currentGun.GetMaxBeltAmmo());
     }
-    private void SwitchGuns()
+    private void SwitchGuns(bool switchToNextGun = true)
     {
         ///Set up switching guns mechanic. 
-        ///Have gun non used guns disabled and only held gun enabled
+        ///Have gun non used guns disabled and only hold gun enabled
         currentGun.gameObject.SetActive(false);
-        currGunNode = currGunNode.Next;
+        if(switchToNextGun) //switch to next gun
+            currGunNode = currGunNode.Next;
+        else //switch to the prior gun
+            currGunNode = currGunNode.Previous;
         currentGun = currGunNode.Value.GetComponent<GunBase>();
         currentGun.gameObject.SetActive(true);
-
-        //TEMP
-        //currentGun.gameObject.SetActive(false);
-        //foreach (LinkedListNode<GameObject> gun in gunList)
-        //{
-        //    if (gun.Value == potentialGun.gameObject)
-        //    {
-        //        currGunNode = gun;
-        //        currentGun = gun.Value.GetComponent<GunBase>();
-        //        currentGun.gameObject.SetActive(true);
-        //        //[1911 (inactive), Bullfrog (active)]
-        //    }
-        //}
     }
     public void PickUpGun()
     {
@@ -160,9 +150,13 @@ public class PlayerGunManager : MonoBehaviour
     void OnNext(InputValue v)
     {
         print("OnNext: " + v.Get<float>());
+        if(currGunNode.Next != null) 
+            SwitchGuns();
     }
     void OnPrevious(InputValue v)
     {
         print("OnPrevious: " + v.Get<float>());
+        if(currGunNode.Previous != null)
+            SwitchGuns(false);
     }
 }
