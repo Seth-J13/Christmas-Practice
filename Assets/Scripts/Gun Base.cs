@@ -7,6 +7,7 @@ public class GunBase : MonoBehaviour
 {
     //Variables
     //Player
+    private GameObject player;
     private CrossHairFireSpread crossHair;
     private PlayerUIManager playerUI;
     //Gun
@@ -32,11 +33,24 @@ public class GunBase : MonoBehaviour
     [SerializeField] private bool allowTriggerFinger = false;
     [SerializeField] private bool hitscan = false;
     //Functional
+    private bool switchingGuns = false;
     private bool firing = false;
     private bool canFireAgain = true;
     private bool triggerWaitOver = true;
     private bool aimingDownSights = false;
+
     //Unity Basics Functions
+    private void OnEnable()
+    {
+        print(gameObject.name + " endabled");
+        switchingGuns = false;
+        StartCoroutine(WaitToAddAction());
+    }
+    private void OnDisable()
+    {
+        print(gameObject.name + " disabled");
+        player.GetComponent<PlayerGunManager>().SwitchedGuns -= UpdateUI;   
+    }
     private void Awake()
     {
         if (gunName == null)
@@ -50,7 +64,7 @@ public class GunBase : MonoBehaviour
     }
     private void Start()
     {
-        GameObject player = GameObject.Find("Player");
+        player = GameObject.Find("Player");
 
         //Set currMagAmmo & currBeltAmmo
         currMagAmmo = maxMagAmmo;
@@ -167,12 +181,25 @@ public class GunBase : MonoBehaviour
         //AimDownSights
     private void AimDownSights()
     {
-
+        //Add ADS
     }
     public void StartReload()
     {
+
+        ///BUG HERE!!!
+        ///VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+        //Switching guns is staying true for some reason. FIX
+
+        print(switchingGuns);
+        if (switchingGuns)
+            return;
         reloading = true;
         StartCoroutine(ReloadGun());
+    }
+    private void UpdateUI(GunBase gun)
+    {
+        switchingGuns = true;
+        playerUI.UpdateGunAmmo(gun.currMagAmmo, gun.currBeltAmmo);
     }
     //IEnumerators
     IEnumerator FireBullet()
@@ -226,5 +253,10 @@ public class GunBase : MonoBehaviour
         else
             playerUI.UpdateGunAmmo(currMagAmmo, currBeltAmmo);
         reloading = false;
+    }
+    IEnumerator WaitToAddAction()
+    {
+        yield return new WaitForEndOfFrame();
+        player.GetComponent<PlayerGunManager>().SwitchedGuns += UpdateUI;
     }
 }

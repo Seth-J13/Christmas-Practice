@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,6 +18,9 @@ public class PlayerGunManager : MonoBehaviour
     private bool gunShopping = false;
     private bool leftClick = false;
     private float changeInTime = 0;
+
+
+    public event Action<GunBase> SwitchedGuns;
     //Unity Basics
     private void Start()
     {
@@ -34,7 +39,7 @@ public class PlayerGunManager : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         gunShopping = false;
-        potentialGun = null;
+        StartCoroutine(WaitAFrame());
         playerUI.UpdatePickUpText();
     }
     //Methods
@@ -51,7 +56,7 @@ public class PlayerGunManager : MonoBehaviour
         }
         else
         {
-            ///Add inventory management when picking up a new gun when player already has one
+            //Add inventory management when picking up a new gun when player already has one
             //if player has less than 3 weapons then just pick gun up
             //otherwise drop current gun
             if(gunList.Count < 3 && potentialGun != null)
@@ -74,10 +79,12 @@ public class PlayerGunManager : MonoBehaviour
         ///Have gun non used guns disabled and only hold gun enabled
         currentGun.gameObject.SetActive(false);
         if(switchToNextGun) //switch to next gun
-            currGunNode = currGunNode.Next;
+            currGunNode = currGunNode.Next != null ? currGunNode.Next : currGunNode;
         else //switch to the prior gun
-            currGunNode = currGunNode.Previous;
+            currGunNode = currGunNode.Previous != null ? currGunNode.Previous : currGunNode;
+        //Set the current gun to the new active gun
         currentGun = currGunNode.Value.GetComponent<GunBase>();
+        print("This is the current gun: " + currentGun.gameObject.name);
         currentGun.gameObject.SetActive(true);
     }
     public void PickUpGun()
@@ -94,6 +101,7 @@ public class PlayerGunManager : MonoBehaviour
         //Set position and rotation of gun
         gun.position = hand.position;
         gun.rotation = hand.rotation;
+        print("Picked Gun Up");
     }
     public void UpdateVerticalLookPosition(float lookSpeedX, float lookSpeedY, float lookAngleX, float lookAngleY)
     {
@@ -149,14 +157,23 @@ public class PlayerGunManager : MonoBehaviour
     }
     void OnNext(InputValue v)
     {
-        print("OnNext: " + v.Get<float>());
-        if(currGunNode.Next != null) 
-            SwitchGuns();
+        if (currGunNode.Next == null)
+            return;
+        SwitchGuns();
+        StartCoroutine(WaitAFrame());
     }
     void OnPrevious(InputValue v)
     {
-        print("OnPrevious: " + v.Get<float>());
-        if(currGunNode.Previous != null)
-            SwitchGuns(false);
+        if (currGunNode.Previous == null)
+            return;
+        SwitchGuns(false);
+        StartCoroutine(WaitAFrame());
+    }
+
+    IEnumerator WaitAFrame()
+    {
+        yield return new WaitForEndOfFrame();
+        SwitchedGuns.Invoke(currentGun);
+
     }
 }

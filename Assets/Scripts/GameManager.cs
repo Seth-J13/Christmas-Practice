@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     GameObject player;
         
     //Unity Basics
-    private void Awake()
+    private void OnEnable()
     {
         if (instance != null && instance != this)
         {
