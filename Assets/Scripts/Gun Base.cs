@@ -33,7 +33,6 @@ public class GunBase : MonoBehaviour
     [SerializeField] private bool allowTriggerFinger = false;
     [SerializeField] private bool hitscan = false;
     //Functional
-    private bool switchingGuns = false;
     private bool firing = false;
     private bool canFireAgain = true;
     private bool triggerWaitOver = true;
@@ -42,13 +41,10 @@ public class GunBase : MonoBehaviour
     //Unity Basics Functions
     private void OnEnable()
     {
-        print(gameObject.name + " endabled");
-        switchingGuns = false;
         StartCoroutine(WaitToAddAction());
     }
     private void OnDisable()
     {
-        print(gameObject.name + " disabled");
         player.GetComponent<PlayerGunManager>().SwitchedGuns -= UpdateUI;   
     }
     private void Awake()
@@ -74,7 +70,7 @@ public class GunBase : MonoBehaviour
         playerUI = player.GetComponent<PlayerUIManager>();
 
         //Get bullet prefab
-        bullet = Resources.Load<GameObject>("Prefabs/Guns/Bullets/oldBullet");
+        bullet = Resources.Load<GameObject>("Prefabs/Guns/Bullets/Bullet");
 
         //firePoint GameObject transform
         firePoint = transform.Find("FirePoint").transform;
@@ -185,20 +181,12 @@ public class GunBase : MonoBehaviour
     }
     public void StartReload()
     {
-
-        ///BUG HERE!!!
-        ///VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-        //Switching guns is staying true for some reason. FIX
-
-        print(switchingGuns);
-        if (switchingGuns)
-            return;
         reloading = true;
         StartCoroutine(ReloadGun());
     }
     private void UpdateUI(GunBase gun)
     {
-        switchingGuns = true;
+        //switchingGuns = true;
         playerUI.UpdateGunAmmo(gun.currMagAmmo, gun.currBeltAmmo);
     }
     //IEnumerators

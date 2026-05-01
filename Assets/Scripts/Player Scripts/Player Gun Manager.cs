@@ -76,7 +76,9 @@ public class PlayerGunManager : MonoBehaviour
     private void SwitchGuns(bool switchToNextGun = true)
     {
         ///Set up switching guns mechanic. 
-        ///Have gun non used guns disabled and only hold gun enabled
+        ///Have non used guns disabled and only hold gun enabled
+        if (currentGun.GetReloading())
+            return;
         currentGun.gameObject.SetActive(false);
         if(switchToNextGun) //switch to next gun
             currGunNode = currGunNode.Next != null ? currGunNode.Next : currGunNode;
@@ -84,7 +86,6 @@ public class PlayerGunManager : MonoBehaviour
             currGunNode = currGunNode.Previous != null ? currGunNode.Previous : currGunNode;
         //Set the current gun to the new active gun
         currentGun = currGunNode.Value.GetComponent<GunBase>();
-        print("This is the current gun: " + currentGun.gameObject.name);
         currentGun.gameObject.SetActive(true);
     }
     public void PickUpGun()
