@@ -45,7 +45,14 @@ public class GunBase : MonoBehaviour
     }
     private void OnDisable()
     {
-        player.GetComponent<PlayerGunManager>().SwitchedGuns -= UpdateUI;   
+        try
+        {
+            player.GetComponent<PlayerGunManager>().SwitchedGuns -= UpdateUI;   
+        }
+        catch
+        {
+
+        }
     }
     private void Awake()
     {
