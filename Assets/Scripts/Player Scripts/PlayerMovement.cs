@@ -1,7 +1,5 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
@@ -31,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private bool canJump = true;
     private bool wantsToJump = false;
     private bool canPushDown = false;
-    //Crouching
+        //Crouching
     private bool crouching = false;
 
     //Unity Basics Functions

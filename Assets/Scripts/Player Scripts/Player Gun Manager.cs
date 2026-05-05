@@ -21,8 +21,10 @@ public class PlayerGunManager : MonoBehaviour
 
 
     public event Action<GunBase> SwitchedGuns;
-    public delegate void LeftMClick();
-    public static LeftMClick leftMClick;
+    public delegate void LeftMClickDown();
+    public static LeftMClickDown leftMClickDown;
+    public delegate void LeftMClickUp();
+    public static LeftMClickUp leftMClickUp;
     //Unity Basics
     private void Start()
     {
@@ -131,7 +133,6 @@ public class PlayerGunManager : MonoBehaviour
     }
     void OnFire(InputValue v)
     {
-        leftMClick?.Invoke();
         //Is player pressing or releasing the button
         leftClick = v.Get<float>() == 1;
         if (hasGun && currentGun.GetAllowTriggerFinger())
@@ -145,6 +146,10 @@ public class PlayerGunManager : MonoBehaviour
         else if(hasGun)
             currentGun.SetFiring(leftClick);
         changeInTime = !leftClick ? Time.time : changeInTime;
+        if(leftClick)
+            leftMClickDown?.Invoke();
+        else
+            leftMClickUp?.Invoke();
     }
     void OnAimDownSights(InputValue v)
     {
