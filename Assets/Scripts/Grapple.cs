@@ -7,7 +7,7 @@ public class Grapple : MonoBehaviour
     Ray ray;
     LineRenderer line;
     Vector3 hitPoint;
-    [SerializeField][Range(0.001f, 1000f)] float distFromGrapplePoint = 10f;
+    [SerializeField] const float maxDistGrapplePoint = 10f;
     //Player variables
     GameObject player;
     GameObject hand;
@@ -44,11 +44,15 @@ public class Grapple : MonoBehaviour
         {
 
             //Don't use magnitude. It doesn't work
-
+            print(player.transform.position.magnitude + " player | " + (hitPoint + player.transform.position).magnitude + " hit");
             line.SetPosition(0, firepoint.position);
-            if((player.transform.position.magnitude - hitPoint.magnitude) > distFromGrapplePoint)
+            //Get dist between hitPoint and player position
+            Vector3 playerDistFromGrapple = hitPoint - player.transform.position;
+            //Get the abs of playerDistFromGrapple
+            playerDistFromGrapple = new Vector3(Mathf.Abs(playerDistFromGrapple.x), Mathf.Abs(playerDistFromGrapple.y), Mathf.Abs(playerDistFromGrapple.z));
+            if(playerDistFromGrapple.x > maxDistGrapplePoint || playerDistFromGrapple.y > maxDistGrapplePoint || playerDistFromGrapple.z > maxDistGrapplePoint)
             {
-                print(player.transform.position.magnitude - hitPoint.magnitude);
+                playerBody.AddForce(hitPoint, ForceMode.Force);
             }
         }
     }
