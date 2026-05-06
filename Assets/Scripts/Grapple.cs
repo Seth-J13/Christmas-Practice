@@ -6,8 +6,12 @@ public class Grapple : MonoBehaviour
     Transform firepoint;
     Ray ray;
     LineRenderer line;
-    Vector3 hitPoint;
-    [SerializeField][Range(0.001f, 1000f)] float distFromGrapplePoint = 10f;
+    Vector3 hitPoint = Vector3.zero;
+    static float maxHangingPoint = 3.5f;
+    static float maxGrappleDist = 50f;
+    static float grappleSpeed = 150;
+    Vector3 distFromPlayer;
+    Vector3 playerDistFromGrapple;
     //Player variables
     GameObject player;
     GameObject hand;
@@ -37,42 +41,52 @@ public class Grapple : MonoBehaviour
         line = firepoint.transform.GetComponent<LineRenderer>();
         line.enabled = false;
     }
-    private void Update()
+
+    private void FixedUpdate()
     {
         //if line is active then update the lines position
-        if (line.enabled) 
+        if (line.enabled)
         {
-
             //Don't use magnitude. It doesn't work
-
+            print(player.transform.position.magnitude + " player | " + (hitPoint + player.transform.position).magnitude + " hit");
             line.SetPosition(0, firepoint.position);
-            if((player.transform.position.magnitude - hitPoint.magnitude) > distFromGrapplePoint)
-            {
-                print(player.transform.position.magnitude - hitPoint.magnitude);
-            }
+            //Get the abs of playerDistFromGrapple
+            if (playerDistFromGrapple.x > maxHangingPoint || playerDistFromGrapple.y > maxHangingPoint || playerDistFromGrapple.z > maxHangingPoint)
+                playerBody.AddForce((hitPoint - player.transform.position) * Time.deltaTime * grappleSpeed, ForceMode.Acceleration);
+
         }
     }
+    
     void FireGrapple()
     {
-        ray = new Ray(firepoint.position, hand.transform.forward );
+        ray = new Ray(firepoint.position, hand.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            line.enabled = true;
             hitPoint = hit.point;
-            line.SetPosition(1, hitPoint);
+            //Get dist between hitPoint and player position
+            distFromPlayer = hitPoint - player.transform.position;
+            playerDistFromGrapple = new Vector3(Mathf.Abs(distFromPlayer.x), Mathf.Abs(distFromPlayer.y), Mathf.Abs(distFromPlayer.z));
+            if (Mathf.Pow(distFromPlayer.x, 2) + Mathf.Pow(distFromPlayer.y, 2) + Mathf.Pow(distFromPlayer.z, 2) < Mathf.Pow(maxGrappleDist, 2))
+            {
+                line.enabled = true;
+                line.SetPosition(1, hitPoint);
+            }
         }
     }
     private void DisableGrapple()
     {
-        line.enabled = false;
+        line.enabled = false;        
     }
 
     private void OnDrawGizmos()
     {
         try
         {
-            Transform t = gameObject.transform.Find("FirePoint").transform;
-            Gizmos.DrawRay(t.position, GameObject.Find("Player").transform.Find("Shoulder").Find("Hand").forward);
+            Gizmos.DrawLine(firepoint.position, hitPoint);
+            Gizmos.DrawWireSphere(player.transform.position, maxGrappleDist);
+            Gizmos.DrawWireSphere(hitPoint, 3);
+            //Transform t = gameObject.transform.Find("FirePoint").transform;
+            //Gizmos.DrawRay(t.position, GameObject.Find("Player").transform.Find("Shoulder").Find("Hand").forward);
         }
         catch
         {
