@@ -3,8 +3,16 @@ using UnityEngine.InputSystem;
 
 public class PlayerCameraMovement : MonoBehaviour
 {
-    [SerializeField]
-    float camHeight = 0.7f;
+    [SerializeField] float camHeight = 0.7f;
+
+    private void OnEnable()
+    {
+        PlayerMovement.look += UpdateCamPos;
+    }
+    private void OnDisable()
+    {
+        PlayerMovement.look -= UpdateCamPos;
+    }
     public void UpdateCamPos(float lookSpeedX, float lookSpeedY, float lookAngleX, float lookAngleY, Vector3 playerPos)
     {
         //Camera position to player position

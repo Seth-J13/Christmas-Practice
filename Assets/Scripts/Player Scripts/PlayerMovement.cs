@@ -32,11 +32,17 @@ public class PlayerMovement : MonoBehaviour
         //Crouching
     private bool crouching = false;
 
+    //Delegates
+    public delegate void Look(float spdX, float spdY, float angX, float angY, Vector3 plyrPos);
+    public static event Look look;
+
     //Unity Basics Functions
     private void Awake()
     {
+        //Remove Cursor while playing
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        //Setting variables
         body = GetComponent<Rigidbody>();
         cam = Instantiate(Resources.Load<Camera>("Prefabs/Critical Assets/PlayerCam"));
         cam.name = "Player Cam";
@@ -62,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
         //Y rotation <>
         body.rotation = Quaternion.Euler(0, lookAngleX * lookSpeedX * Time.deltaTime, 0);
         //Update Camera Position to Players Position
-        playerCamComponent.UpdateCamPos(lookSpeedX, lookSpeedY, lookAngleX, lookAngleY, transform.position);
+        look?.Invoke(lookSpeedX, lookSpeedY, lookAngleX, lookAngleY, transform.position);
         //Update gun look rotation
         playerGunComponent.UpdateVerticalLookPosition(lookSpeedX, lookSpeedY, lookAngleX, lookAngleY);
         //Player jump
@@ -75,8 +81,8 @@ public class PlayerMovement : MonoBehaviour
         canPushDown = body.linearVelocity.y > -0.01f ? false : true;
     }
     //Methods
-    public void Grouded() { canJump = true; }
-    public void SetCam(Camera cam) { this.cam = cam; }
+    public void Grouded() => canJump = true; 
+    public void SetCam(Camera cam) => this.cam = cam; 
     private void Crouch()
     {
         crouching = true;
@@ -105,15 +111,11 @@ public class PlayerMovement : MonoBehaviour
     void OnLook(InputValue v)
     {
         lookAngleX += v.Get<Vector2>().x;
+        //If the look angle is not going past the limit (angleY)
         if(lookAngleY < angleY && lookAngleY > -angleY)
             lookAngleY += v.Get<Vector2>().y;
         else
-        {
-            if (lookAngleY > 0)
-                lookAngleY = angleY - 1;
-            else
-                lookAngleY = -(angleY - 1);
-        }
+            lookAngleY = lookAngleY > 0 ? angleY - 1 : -(angleY - 1);
     }
     void OnJump(InputValue v)
     {
