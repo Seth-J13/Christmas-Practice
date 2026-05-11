@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.GraphToolkit.Editor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -14,8 +15,10 @@ public class PlayerMovement : MonoBehaviour
     PlayerGunManager playerGunComponent;
         //Moving
     private Vector3 p_Pos = Vector3.zero;
-    public float moveSpeed = 5f;
-    public float runSpeed = 10f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float runSpeed = 10f;
+    [SerializeField] private float increaseLerp = 0.1f;
+    private float lerpAmount = 0;
     private bool isRunning = false;
         //Looking
     public float lookSpeedX = 5f;
@@ -56,10 +59,14 @@ public class PlayerMovement : MonoBehaviour
         {
             if(crouching)
                 UnCrouch();
-            body.AddForce(Quaternion.FromToRotation(Vector3.forward, new Vector3(transform.forward.x, 0, transform.forward.z)) * p_Pos * runSpeed * Time.deltaTime, ForceMode.Force);
+            lerpAmount += increaseLerp; 
+            float lerp = Mathf.Lerp(moveSpeed, runSpeed, lerpAmount);
+            body.AddForce(Quaternion.FromToRotation(Vector3.forward, new Vector3(transform.forward.x, 0, transform.forward.z)) * p_Pos * lerp * Time.deltaTime, ForceMode.Force);
         }
         else if (body.linearVelocity.x < 30 && body.linearVelocity.y < 30)
+        {
             body.AddForce(Quaternion.FromToRotation(Vector3.forward, new Vector3(transform.forward.x, 0, transform.forward.z)) * p_Pos * moveSpeed * Time.deltaTime, ForceMode.Force);
+        }
        
         //Push Player down (Heavier Gravity)
         if(canPushDown && (!canJump || crouching))
@@ -107,6 +114,10 @@ public class PlayerMovement : MonoBehaviour
     void OnSprint(InputValue v)
     {
         isRunning = v.Get<float>() == 1 ? true : false;
+        if(!isRunning)
+        {
+            lerpAmount = 0f;
+        }
     }
     void OnLook(InputValue v)
     {
