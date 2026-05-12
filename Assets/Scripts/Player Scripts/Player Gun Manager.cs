@@ -81,7 +81,7 @@ public class PlayerGunManager : MonoBehaviour
     {
         ///Set up switching guns mechanic. 
         ///Have non used guns disabled and only hold gun enabled
-        if (currentGun.GetReloading())
+        if (gunList.Count <= 0 || currentGun.GetReloading())
             return;
         currentGun.gameObject.SetActive(false);
         if(switchToNextGun) //switch to next gun
@@ -166,14 +166,14 @@ public class PlayerGunManager : MonoBehaviour
     }
     void OnNext(InputValue v)
     {
-        if (currGunNode.Next == null)
+        if (gunList.Count > 0 && currGunNode.Next == null)
             return;
         SwitchGuns();
         StartCoroutine(WaitAFrame());
     }
     void OnPrevious(InputValue v)
     {
-        if (currGunNode.Previous == null)
+        if (gunList.Count > 0 && currGunNode.Previous == null)
             return;
         SwitchGuns(false);
         StartCoroutine(WaitAFrame());
@@ -182,7 +182,6 @@ public class PlayerGunManager : MonoBehaviour
     IEnumerator WaitAFrame()
     {
         yield return new WaitForEndOfFrame();
-        SwitchedGuns.Invoke(currentGun);
-
+        SwitchedGuns?.Invoke(currentGun);
     }
 }

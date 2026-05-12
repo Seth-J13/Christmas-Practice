@@ -38,7 +38,8 @@ public class PlayerMovement : MonoBehaviour
     //Delegates
     public delegate void Look(float spdX, float spdY, float angX, float angY, Vector3 plyrPos);
     public static event Look look;
-
+    public delegate void Moving(Vector3 playerMoveDir);
+    public static event Moving playerMoving;
     //Unity Basics Functions
     private void Awake()
     {
@@ -47,10 +48,14 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
         //Setting variables
         body = GetComponent<Rigidbody>();
+            //camera
         cam = Instantiate(Resources.Load<Camera>("Prefabs/Critical Assets/PlayerCam"));
         cam.name = "Player Cam";
         playerCamComponent = cam.GetComponent<PlayerCameraMovement>();
         playerGunComponent = GetComponent<PlayerGunManager>();
+        //camera wheels
+        GameObject camWheels = Instantiate(Resources.Load<GameObject>("Prefabs/Critical Assets/Camera Wheels"));
+        cam.transform.parent = camWheels.transform;
     }
     private void FixedUpdate()
     {
@@ -110,6 +115,7 @@ public class PlayerMovement : MonoBehaviour
     void OnMove(InputValue v)
     {
         p_Pos = new Vector3(v.Get<Vector2>().x, 0, v.Get<Vector2>().y);
+        playerMoving?.Invoke(p_Pos);
     }
     void OnSprint(InputValue v)
     {
