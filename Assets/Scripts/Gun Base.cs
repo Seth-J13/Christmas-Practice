@@ -88,22 +88,6 @@ public class GunBase : MonoBehaviour
         crossHair.SetMaxSpread(spread);
         crossHair.SetSpreadExpansionRate(spreadExpansionRate);
 
-        //Spawn Bullets
-        GameObject tempBullet;
-        BulletManager bm;
-        for (int i = 0; i < maxMagAmmo * 2; i++)
-        {
-            //Spawn bullet GameObject
-            tempBullet = Instantiate(bullet);
-            tempBullet.name = "bullet " + i; //give bullet a identifiable name
-            bm = tempBullet.GetComponent<BulletManager>(); //Get bullet manager from the bullet
-            bm.SetBulletNumber(i); //Set bullet id
-            bm.SetBulletSpread(spread, crossHair);//Set bullet spread and give reference to the crossHair
-            tempBullet.transform.position = new Vector3(i * 3, -20, 0);//place bullet seperate from each other for debugging
-            //Add GameObject and bullet manager to respective queues for object pooling
-            bullets.Enqueue(tempBullet);
-            bulletManagers.Enqueue(bm);
-        }
     }
     private void Update()
     {
@@ -116,7 +100,6 @@ public class GunBase : MonoBehaviour
                 StartCoroutine(TriggerWait());
                 Fire();
             }
-
         }
     }
     //Methods
@@ -195,6 +178,34 @@ public class GunBase : MonoBehaviour
     {
         //switchingGuns = true;
         playerUI.UpdateGunAmmo(gun.currMagAmmo, gun.currBeltAmmo);
+    }
+    public void SpawnBullets()
+    {
+        //Spawn Bullets
+        GameObject tempBullet;
+        BulletManager bm;
+        for (int i = 0; i < maxMagAmmo * 2; i++)
+        {
+            //Spawn bullet GameObject
+            tempBullet = Instantiate(bullet);
+            tempBullet.name = "bullet " + i; //give bullet a identifiable name
+            bm = tempBullet.GetComponent<BulletManager>(); //Get bullet manager from the bullet
+            bm.SetBulletNumber(i); //Set bullet id
+            bm.SetBulletSpread(spread, crossHair);//Set bullet spread and give reference to the crossHair
+            tempBullet.transform.position = new Vector3(i * 3, -20, 0);//place bullet seperate from each other for debugging
+            //Add GameObject and bullet manager to respective queues for object pooling
+            bullets.Enqueue(tempBullet);
+            bulletManagers.Enqueue(bm);
+        }
+    }
+    public void DespawnBullets()
+    {
+        foreach (var item in bullets)
+        {
+            Destroy(item.gameObject);
+        }
+        bullets.Clear();
+        bulletManagers.Clear();
     }
     //IEnumerators
     IEnumerator FireBullet()

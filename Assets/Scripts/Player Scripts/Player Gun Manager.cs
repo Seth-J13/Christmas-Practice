@@ -25,6 +25,7 @@ public class PlayerGunManager : MonoBehaviour
     public static LeftMClickDown leftMClickDown;
     public delegate void LeftMClickUp();
     public static LeftMClickUp leftMClickUp;
+
     //Unity Basics
     private void Start()
     {
@@ -75,14 +76,16 @@ public class PlayerGunManager : MonoBehaviour
                 //DROP GUN CODE
             }
         }
+        currentGun.SpawnBullets();
         playerUI.UpdateGunAmmo(currentGun.GetMaxMagAmmo(), currentGun.GetMaxBeltAmmo());
     }
     private void SwitchGuns(bool switchToNextGun = true)
     {
-        ///Set up switching guns mechanic. 
-        ///Have non used guns disabled and only hold gun enabled
+        //switching guns mechanic. 
+        //Non used guns disabled and only hold gun enabled
         if (gunList.Count <= 0 || currentGun.GetReloading())
             return;
+        currentGun.DespawnBullets();
         currentGun.gameObject.SetActive(false);
         if(switchToNextGun) //switch to next gun
             currGunNode = currGunNode.Next != null ? currGunNode.Next : currGunNode;
@@ -91,6 +94,7 @@ public class PlayerGunManager : MonoBehaviour
         //Set the current gun to the new active gun
         currentGun = currGunNode.Value.GetComponent<GunBase>();
         currentGun.gameObject.SetActive(true);
+        currentGun.SpawnBullets();
     }
     public void PickUpGun()
     {
@@ -106,7 +110,6 @@ public class PlayerGunManager : MonoBehaviour
         //Set position and rotation of gun
         gun.position = hand.position;
         gun.rotation = hand.rotation;
-        print("Picked Gun Up");
     }
     public void UpdateVerticalLookPosition(float lookSpeedX, float lookSpeedY, float lookAngleX, float lookAngleY)
     {
