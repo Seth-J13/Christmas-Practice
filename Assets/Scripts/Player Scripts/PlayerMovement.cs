@@ -20,26 +20,29 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float increaseLerp = 0.1f;
     private float lerpAmount = 0;
     private bool isRunning = false;
-        //Looking
-    public float lookSpeedX = 5f;
-    public float lookSpeedY = 5f;
+    //Looking
+    [SerializeField] private float lookSpeedX = 5f;
+    [SerializeField] private float lookSpeedY = 5f;
     private float lookAngleX = 0f;
     private float lookAngleY = 0f;
     [SerializeField] private int angleY = 100;
-        //Jumping
-    public float jumpForce = 500f;
-    public float gravityScale = 3f;
+    //Jumping
+    [SerializeField] private float jumpForce = 500f;
+    [SerializeField] private float gravityScale = 3f;
     private bool canJump = true;
     private bool wantsToJump = false;
     private bool canPushDown = false;
-        //Crouching
+    //Crouching
+    CapsuleCollider capsule;
     private bool crouching = false;
+    [SerializeField] private float crouchHeight = 1.25f;
+    [SerializeField] private float standingHeight = 2.0f;
+    [SerializeField] private Vector3 standingCenter = Vector3.zero;
+    [SerializeField] private Vector3 crouchingCenter = new Vector3(0, 0.375f, 0);
 
     //Delegates
     public delegate void Look(float spdX, float spdY, float angX, float angY, Vector3 plyrPos);
     public static event Look look;
-    public delegate void Moving(Vector3 playerMoveDir);
-    public static event Moving playerMoving;
     //Unity Basics Functions
     private void Awake()
     {
@@ -48,12 +51,14 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
         //Setting variables
         body = GetComponent<Rigidbody>();
-            //camera
+        capsule = GetComponent<CapsuleCollider>();
+
+        //camera
         cam = Instantiate(Resources.Load<Camera>("Prefabs/Critical Assets/PlayerCam"));
         cam.name = "Player Cam";
         playerCamComponent = cam.GetComponent<PlayerCameraMovement>();
         playerGunComponent = GetComponent<PlayerGunManager>();
-        //camera wheels
+            //camera wheels
         GameObject camWheels = Instantiate(Resources.Load<GameObject>("Prefabs/Critical Assets/Camera Wheels"));
         cam.transform.parent = camWheels.transform;
     }
@@ -87,10 +92,23 @@ public class PlayerMovement : MonoBehaviour
         if (wantsToJump && canJump)
         {
             body.AddForce(Vector3.up * jumpForce * Time.deltaTime, ForceMode.Impulse);
-            StartCoroutine(WaitToPushPlayerDown());
+            //StartCoroutine(WaitToPushPlayerDown());
             canJump = false;
         }
         canPushDown = body.linearVelocity.y > -0.01f ? false : true;
+
+        if(crouching && capsule.height > crouchHeight && capsule.center.y < crouchingCenter.y)
+        {
+            capsule.height = Mathf.Lerp(standingHeight, crouchHeight, lerpAmount);
+            capsule.center = Vector3.Lerp(standingCenter, crouchingCenter, lerpAmount);
+            lerpAmount += increaseLerp;
+        }
+        else if(!crouching && capsule.height < standingHeight && capsule.center.y > standingCenter.y)
+        {
+            capsule.height = Mathf.Lerp(crouchHeight, standingHeight, lerpAmount);
+            capsule.center = Vector3.Lerp(crouchingCenter, standingCenter, lerpAmount);
+            lerpAmount += increaseLerp;
+        }
     }
     //Methods
     public void Grouded() => canJump = true; 
@@ -99,31 +117,21 @@ public class PlayerMovement : MonoBehaviour
     {
         crouching = true;
         moveSpeed = moveSpeed / 1.5f;
-        CapsuleCollider capsule = GetComponent<CapsuleCollider>();
-        capsule.height = 1.25f;
-        capsule.center = new Vector3(0, 0.375f, 0);
     }
     private void UnCrouch()
     {
         crouching = false;
         moveSpeed = moveSpeed * 1.5f;
-        CapsuleCollider capsule = GetComponent<CapsuleCollider>();
-        capsule.height = 2;
-        capsule.center = Vector3.zero;
     }
     //Movement
     void OnMove(InputValue v)
     {
         p_Pos = new Vector3(v.Get<Vector2>().x, 0, v.Get<Vector2>().y);
-        playerMoving?.Invoke(p_Pos);
     }
     void OnSprint(InputValue v)
     {
         isRunning = v.Get<float>() == 1 ? true : false;
-        if(!isRunning)
-        {
-            lerpAmount = 0f;
-        }
+        ResetLerpAmount();
     }
     void OnLook(InputValue v)
     {
@@ -140,11 +148,13 @@ public class PlayerMovement : MonoBehaviour
     }
     void OnCrouch(InputValue v)
     {
+        ResetLerpAmount();
         if(crouching)
             UnCrouch();
         else
             Crouch();
     }
+    void ResetLerpAmount() => lerpAmount = 0;
     //Enumerators
     IEnumerator WaitToPushPlayerDown()
     {
