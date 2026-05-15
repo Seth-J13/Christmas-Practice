@@ -8,7 +8,7 @@ public class PlayerUIManager : MonoBehaviour
     TextMeshProUGUI currAmmo;
     TextMeshProUGUI gunNameText;
         //Text
-    private const string startPickUpPhrase = "Press \"F\" to pick up ";
+    private static string startPickUpPhrase = "Press \"F\" to pick up ";
 
     //Unity Basics Functions
     private void Awake()
