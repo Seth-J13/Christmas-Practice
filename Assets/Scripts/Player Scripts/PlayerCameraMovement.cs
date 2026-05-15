@@ -1,12 +1,9 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerCameraMovement : MonoBehaviour
 {
     [SerializeField] float camHeight = 0.7f;
     private new Transform camera;
-    bool doOnce = true;
     private void OnEnable()
     {
         PlayerMovement.look += UpdateCamPos;

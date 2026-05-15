@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.GraphToolkit.Editor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -43,6 +42,8 @@ public class PlayerMovement : MonoBehaviour
     //Delegates
     public delegate void Look(float spdX, float spdY, float angX, float angY, Vector3 plyrPos);
     public static event Look look;
+    public delegate void Sprinting();
+    public static event Sprinting sprinting;
     //Unity Basics Functions
     private void Awake()
     {
@@ -55,19 +56,22 @@ public class PlayerMovement : MonoBehaviour
 
         //camera
         cam = Instantiate(Resources.Load<Camera>("Prefabs/Critical Assets/PlayerCam"));
-        cam.name = "Player Cam";
+        cam.name = "PlayerCam";
+        cam.GetComponent<CameraEffects>().SetPlayer(gameObject);
         playerCamComponent = cam.GetComponent<PlayerCameraMovement>();
         playerGunComponent = GetComponent<PlayerGunManager>();
             //camera wheels
         GameObject camWheels = Instantiate(Resources.Load<GameObject>("Prefabs/Critical Assets/Camera Wheels"));
         cam.transform.parent = camWheels.transform;
+        camWheels.name = "Cam Wheels";
     }
     private void FixedUpdate()
     {
         //XZ movement
         if (isRunning && body.linearVelocity.x < 30 && body.linearVelocity.y < 30)
         {
-            if(crouching)
+            sprinting?.Invoke();
+            if (crouching)
                 UnCrouch();
             lerpAmount += increaseLerp; 
             float lerp = Mathf.Lerp(moveSpeed, runSpeed, lerpAmount);

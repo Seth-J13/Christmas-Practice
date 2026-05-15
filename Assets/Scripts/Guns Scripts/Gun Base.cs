@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TreeEditor;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -10,8 +13,10 @@ public class GunBase : MonoBehaviour
     private GameObject player;
     private CrossHairFireSpread crossHair;
     private PlayerUIManager playerUI;
+    private Camera cam;
     //Gun
     private Transform firePoint;
+    private ParticleSystem bulletParticle;
     [SerializeField] private string gunName = null;
     //Ammo
     private GameObject bullet;
@@ -68,7 +73,8 @@ public class GunBase : MonoBehaviour
     private void Start()
     {
         player = GameObject.Find("Player");
-
+        //Set Camera
+        cam = GameObject.Find("PlayerCam").GetComponent<Camera>();;
         //Set currMagAmmo & currBeltAmmo
         currMagAmmo = maxMagAmmo;
         currBeltAmmo = maxBeltAmmo;
@@ -87,6 +93,15 @@ public class GunBase : MonoBehaviour
         crossHair.SetDecreaseRate(spreadDecreaseRate);
         crossHair.SetMaxSpread(spread);
         crossHair.SetSpreadExpansionRate(spreadExpansionRate);
+        //get particles
+        try
+        {
+            bulletParticle = transform.Find("ShootEffect").GetChild(0).GetComponent<ParticleSystem>();
+        }
+        catch
+        {
+            print("No particles");
+        }
 
     }
     private void Update()
@@ -105,32 +120,18 @@ public class GunBase : MonoBehaviour
     //Methods
     //Getters and Setters
     //Max Mag Ammo
-    public void SetMaxMagAmmo(int ammoAmount)
-    {
-        this.maxMagAmmo = ammoAmount;
-    }
+    public void SetMaxMagAmmo(int ammoAmount) => this.maxMagAmmo = ammoAmount;
     public int GetMaxMagAmmo() => maxMagAmmo;
     //Max Belt Ammo
-    public void SetMaxBeltAmmo(int maxBeltAmmo)
-    {
-        this.maxBeltAmmo = maxBeltAmmo;
-    }
+    public void SetMaxBeltAmmo(int maxBeltAmmo) => this.maxBeltAmmo = maxBeltAmmo;
     public int GetMaxBeltAmmo() => maxBeltAmmo;
     //Fire Rate
-    public void SetFireRate(float fireRate)
-    {
-        this.fireRate = fireRate;
-    }
+    public void SetFireRate(float fireRate) => this.fireRate = fireRate;
     public float GetFireRate() => fireRate;
-    
     //Hitscan
     public bool GetHitscan() => hitscan;
-    
     //Reload Time
-    public void SetReloadTime(float reloadTime)
-    {
-        this.reloadTime = reloadTime;
-    }
+    public void SetReloadTime(float reloadTime) => this.reloadTime = reloadTime;
     //Reloading bool
     public bool GetReloading() => reloading;
     //Firing bool
@@ -146,17 +147,11 @@ public class GunBase : MonoBehaviour
     
     //Trigger Finger bool
     public bool GetAllowTriggerFinger() => allowTriggerFinger;
-    
     //AimingDownSights bool
-    public void SetAimDownSights(bool b)
-    {
-        aimingDownSights = b;
-    }
+    public void SetAimDownSights(bool b) => aimingDownSights = b;
     public bool GetAimDownSights() => aimingDownSights;
-    
     //Gun Name
     public string GetGunName() => gunName;
-    
     //Actions
         //Fire
     private void Fire()
@@ -176,7 +171,7 @@ public class GunBase : MonoBehaviour
     }
     private void UpdateUI(GunBase gun)
     {
-        //switchingGuns = true;
+        //switchingGuns = true; IDK if this is important. I forgot
         playerUI.UpdateGunAmmo(gun.currMagAmmo, gun.currBeltAmmo);
     }
     public void SpawnBullets()
@@ -212,7 +207,13 @@ public class GunBase : MonoBehaviour
     {
         if(hitscan)
         {
-            //Figure out hitscan
+            //Spawn bullet particle
+
+            if(Physics.Raycast(new Ray(firePoint.position, cam.transform.forward), out RaycastHit hit))
+            {
+                bulletParticle.Play(true);
+                print(hit.point);
+            }
         }
         else
         {
