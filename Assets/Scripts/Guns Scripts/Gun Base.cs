@@ -17,6 +17,7 @@ public class GunBase : MonoBehaviour
     //Gun
     private Transform firePoint;
     private ParticleSystem bulletParticle;
+    private ParticleSystem bulletImpact;
     [SerializeField] private string gunName = null;
     //Ammo
     private GameObject bullet;
@@ -54,10 +55,7 @@ public class GunBase : MonoBehaviour
         {
             player.GetComponent<PlayerGunManager>().SwitchedGuns -= UpdateUI;   
         }
-        catch
-        {
-
-        }
+        catch {}
     }
     private void Awake()
     {
@@ -96,12 +94,10 @@ public class GunBase : MonoBehaviour
         //get particles
         try
         {
-            bulletParticle = transform.Find("ShootEffect").GetChild(0).GetComponent<ParticleSystem>();
+            bulletParticle = transform.Find("Bullet").GetComponent<ParticleSystem>();
+            bulletImpact = Resources.Load<ParticleSystem>("Prefabs/Critical Assets/Effects/Bullet Impact");
         }
-        catch
-        {
-            print("No particles");
-        }
+        catch {}
 
     }
     private void Update()
@@ -208,12 +204,7 @@ public class GunBase : MonoBehaviour
         if(hitscan)
         {
             //Spawn bullet particle
-
-            if(Physics.Raycast(new Ray(firePoint.position, cam.transform.forward), out RaycastHit hit))
-            {
-                bulletParticle.Play(true);
-                print(hit.point);
-            }
+            bulletParticle.Play(true);
         }
         else
         {
@@ -226,10 +217,10 @@ public class GunBase : MonoBehaviour
         //puts bullet and manager back into queue
             bullets.Enqueue(newBullet);
             bulletManagers.Enqueue(bm);
-        //Ammo tracking
-            currMagAmmo--;
-            playerUI.UpdateGunAmmo(currMagAmmo, currBeltAmmo);
         }
+        //Ammo tracking
+        currMagAmmo--;
+        playerUI.UpdateGunAmmo(currMagAmmo, currBeltAmmo);
         crossHair.UpdateCrossHairPositions();
         yield return new WaitForSeconds(fireRate);
         canFireAgain = true;

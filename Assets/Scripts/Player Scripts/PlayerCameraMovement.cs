@@ -16,7 +16,6 @@ public class PlayerCameraMovement : MonoBehaviour
     {
         camera = transform.GetChild(0).transform;
         camera.position = new Vector3(0, camHeight, 0);
-        print(transform.ToString());
     }
     public void UpdateCamPos(float lookSpeedX, float lookSpeedY, float lookAngleX, float lookAngleY, Vector3 playerPos)
     {

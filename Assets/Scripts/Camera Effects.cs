@@ -30,7 +30,7 @@ public class CameraEffects : MonoBehaviour
         rate.constant = playerBody.linearVelocity.magnitude;
         emission.rateOverTime = rate;
 
-        var speedVariant = runningEffect.startSpeed;
+        var speedVariant = runningEffect.main.startSpeed;
         speedVariant = playerBody.linearVelocity.magnitude;
         StartCoroutine(ResetSprintEffect());
     }
